@@ -1,40 +1,196 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Three.js Example</title>
-  <style>
-    body { margin: 0; }
-    canvas { display: block; }
-  </style>
-</head>
-<body>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script>
-    // Basic Three.js Setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+<html>
 
-    // Cube Example
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    <head>
+        <title>practice</title>
+        <style>
+            body {
+                margin: 0;
+            }
 
-    camera.position.z = 5;
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
 
-    const animate = function () {
-      requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
-      renderer.render(scene, camera);
-    };
+            ::-webkit-scrollbar {
+                display: none;
+            }
+        </style>
 
-    animate();
-  </script>
-</body>
+    <body>
+        <script src="three.js"></script>
+        <script src="OrbitControl.js"></script>
+        <script src="Tween.js"></script>
+        <script src="perlin.js"></script>
+        <script src="DeviceOrientationControls.js"></script>
+        <script src="StereoEffect.js"></script>
+        <script src="OBJLoader.js"></script>
+
+
+        <script>
+
+
+            var rColor = Math.random();
+            var rH = Math.random();
+            var rS = Math.random();
+            var rL = Math.random();
+            var color = new THREE.Color(rH, rS, rL);
+            var clock = new THREE.Clock();
+            var worldWidth = 100, worldDepth = 100;
+            var worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
+            var ground = [];
+            var particles = [];
+            var height = 6;
+            var h = 4;
+            var pNoise;
+            var flightSpeed = 0.08;
+
+            var scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(color, 0.1, 100);
+            scene.fog.color = color;
+            scene.background = color;
+            scene.background.fog = false;
+            var renderer = new THREE.WebGLRenderer();
+            renderer.antialias = true; renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+            var effect = new THREE.StereoEffect(renderer);
+
+            var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(-15, 22, 65);
+            camera.lookAt(scene.position);
+            scene.add(camera);
+
+            //TETRAHEDRON//
+            var geometry = new THREE.TetrahedronGeometry(1, 1);
+            var materials = [new THREE.MeshBasicMaterial({ color: 'blue', wireframe: true }), new THREE.MeshBasicMaterial({ color: 'black', wireframe: false })];
+            var tetraWire = new THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+            tetraWire.position.set(0, 1, -50);
+            tetraWire.scale.set(.2, .4, .2);
+            scene.add(tetraWire);
+
+            //TET//
+            var geometry = new THREE.TetrahedronGeometry(1, 1);
+            var material = new THREE.MeshBasicMaterial({ color: "white", wireframe: true });
+            var tet = new THREE.Mesh(geometry, material);
+            tet.position.set(-10, 10, 40);
+            tet.scale.set(2, 2, 2);
+            scene.add(tet);
+            //TET2//
+            var geometry = new THREE.TetrahedronGeometry(1, 1);
+            var material = new THREE.MeshBasicMaterial({ color: "white", wireframe: false, opacity: 1, transparency: true });
+            var tet2 = new THREE.Mesh(geometry, material);
+            tet2.position.set(-10, 10, -80);
+            tet2.scale.set(8, 8, 8);
+            scene.add(tet2);
+
+            ////
+
+
+            //SEAMLESS PERLIN TERRAIN//    
+            var geometry = new THREE.PlaneGeometry(100, 100, 100, 100);
+            var material = [new THREE.MeshBasicMaterial({ color: "white", wireframe: true }), new THREE.MeshBasicMaterial()];
+            material[1].color.setHSL(rColor, rColor, rColor);
+
+            for (var i = 0; l = geometry.vertices.length, i < l; i++) {
+                var vertex = geometry.vertices[i];
+                var pNoise = Math.abs(noise.perlin2(vertex.x / h, vertex.y / h));
+                vertex.z = pNoise * height;
+            }
+
+            var terrain = new THREE.SceneUtils.createMultiMaterialObject(geometry, material);
+            terrain.rotation.x = Math.PI * -0.5;
+            terrain.position.z = 0;
+            scene.add(terrain);
+
+            var terrain2 = new THREE.SceneUtils.createMultiMaterialObject(geometry, material);
+            terrain2.rotation.x = Math.PI * -0.5;
+            terrain2.position.z = -100;
+            scene.add(terrain2);
+
+            var tVert = terrain.children[1].geometry.vertices;
+            //console.log(tVert);
+
+            for (var i = 0; i < tVert.length; i++) {
+                var depth = worldHalfDepth;
+
+                if (tVert[i].y === depth || tVert[i].y === -depth) {
+                    var vertex1 = tVert[i];
+                    tVert[i].z = Math.abs(noise.perlin2(vertex1.x, vertex1.y));
+                }
+            }
+
+            //PARTICLES//
+            function makeParticles() {
+
+
+                for (var zpos = -100; zpos < 100; zpos += 20) {
+                    var material = new THREE.PointsMaterial({ color: 0xffffff })
+                    var particle = new THREE.Sprite(material);
+                    particle.position.x = Math.random() * 10 - 5;
+                    particle.position.z = zpos;
+                    particle.scale.x = particle.scale.y = 1;
+                    scene.add(particle);
+                    particles.push(particle);
+                }
+            }
+            makeParticles();
+
+            function updateParticles() {
+                for (var i = 0; i < particles.length; i++)
+                    particle = particles[i];
+                particle.position.z += 0.1;
+                if (particle.position.z > 200) {
+                    particle.position.z = -200;
+                }
+            }
+
+            var controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // var controls = new THREE.DeviceOrientationControls( camera );
+
+
+
+
+            function render() {
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+
+                terrain.position.z += flightSpeed;
+                terrain2.position.z += flightSpeed;
+                tet2.position.z += flightSpeed;
+                tet.rotation.y += 0.01;
+
+                if (terrain.position.z > 100) {
+                    terrain.position.z = -99;
+                }
+                if (terrain2.position.z > 100) {
+                    terrain2.position.z = -99;
+                }
+                if (tet2.position.z > camera.position.z) {
+                    tet2.position.z = -80;
+                }
+                rColor += 0.01;
+
+                tetraWire.scale.x += 0.001;
+                tetraWire.scale.y += 0.001;
+                tetraWire.scale.z += 0.001;
+
+                tetraWire.rotation.y += .01;
+
+                tetraWire.position.y += 0.001;
+                tetraWire.position.z += 0.01;
+
+                controls.update();
+                updateParticles();
+
+            }
+
+            render();
+
+            console.log(rColor);
+        </script>
+
+    </body>
+    </head>
+
 </html>

@@ -1,0 +1,271 @@
+   /* //Quick PERLIN terrain//       
+            function createTerrain(){
+                for (var z = 100; z > -200;z -=100){
+                    var geometry = new THREE.PlaneGeometry(100,100,100,100);
+                    var material = [new THREE.MeshBasicMaterial({color:"red", wireframe:true}), new THREE.MeshBasicMaterial()];
+                    material[1].color.setHSL(rColor,rColor,rColor);
+                    
+                    for (var i = 0; l = geometry.vertices.length, i<l; i++){
+                    var vertex = geometry.vertices[i];    
+                    var pNoise = Math.abs(noise.perlin2(vertex.x/amplitude,vertex.y/amplitude));
+                    vertex.z = pNoise * 5;
+                    }
+                        
+                    var terrain = new THREE.SceneUtils.createMultiMaterialObject(geometry,material);;
+                    terrain.rotation.x = Math.PI *-0.5;
+                    terrain.position.z = z;
+                    //terrain.position.y -=4;
+                    scene.add(terrain);
+                    ground.push(terrain);
+                                          
+                }
+                
+            }
+                createTerrain();
+                */
+                
+  
+  
+  /* //THREEx.TERRAIN //   
+            var heightMap = THREEx.Terrain.allocateHeightMap(100,100);
+	           THREEx.Terrain.simplexHeightMap(heightMap);
+	       var geometry	= THREEx.Terrain.heightMapToPlaneGeometry(heightMap);
+	           THREEx.Terrain.heightMapToVertexColor(heightMap,geometry);
+            var material = [new THREE.MeshBasicMaterial({
+                shading : THREE.FlatShading}),new THREE.MeshBasicMaterial({color:"maroon",wireframe:true})]  
+            material[0].color.setHSL(random,random,random);
+            var plane = new THREE.SceneUtils.createMultiMaterialObject(geometry,material);
+                scene.add(plane);
+                plane.scale.y =15;
+                plane.scale.x =15;    ;
+                plane.scale.z =3;
+                plane.rotation.x = Math.PI * -.5;
+                plane.scale.multiplyScalar(5);
+            var newPlane = plane.clone();
+                scene.add(newPlane);
+                newPlane.position.z = plane.position.z -75;
+            var newPlane2 = plane.clone();
+                scene.add(newPlane2);
+                newPlane2.position.z = newPlane.position.z -75 ;
+                
+              */
+            
+    /*        //RandomTerrain//
+            var geometry = new THREE.PlaneGeometry(worldWidth,worldDepth,worldWidth,worldDepth);
+            var material = [new THREE.MeshBasicMaterial({color:"red", wireframe:true}), new THREE.MeshBasicMaterial()];
+                material[1].color.setHSL(rColor,rColor,rColor);
+            var plane = new THREE.SceneUtils.createMultiMaterialObject(geometry, material);    
+                geometry.dynamic = true;
+                plane.rotation.x = Math.PI * -0.5;
+                scene.add(plane);
+            var newPlane = plane.clone();
+                scene.add(newPlane);
+                newPlane.position.z = -100;
+            var newPlane2 = plane.clone();
+                scene.add(newPlane2);
+                newPlane2.position.z = -200;
+                */
+                
+         /*   //PerlinTERRAIN//
+                var width = 100, widthHalf = 50;
+                var depth = 100, depthHalf = 50;
+                var spacingX = 1;
+                var spacingZ = 1;
+                var height = 2;
+                var plane1, plane2;
+                
+                
+            create3DTerrain(width,depth,spacingX,spacingZ,height)    
+                
+            function create3DTerrain (width,depth,spacingX,spacingZ,height){
+                
+                
+                //seed//
+              // var date = new Date();
+                //noise.seed(Math.random());
+                
+                
+                var zoff = 100;
+                var xoff
+               //Verts// 
+                var geometry = new THREE.Geometry();
+                    for (var z = 0; z<depth; z++){
+                        for (var x = 0; x<width; x++){
+                            var yValue = Math.abs(noise.perlin2(x/5,z/5)*height);
+                            var vertex = new THREE.Vector3(x*spacingX, yValue*height,z*spacingZ);
+                           
+                            geometry.vertices.push(vertex);
+                            geometry.verticesNeedUpdate = true;
+                        }
+                    }
+                
+                
+                //Faces//
+                for (var z = 0; z<depth -1; z++){
+                    for(var x = 0; x<width -1; x++){
+                        
+                        var a = x + z * width;
+                        var b = (x+1) + (z *width);
+                        var c = x + ((z+1)*width);
+                        var d = (x+1)+((z+1)*width);
+                        
+                        var face1 = new THREE.Face3(b,a,c);
+                        var face2 = new THREE.Face3(c,d,b);
+                        geometry.faces.push(face1);
+                        geometry.faces.push(face2);
+                    }
+                }
+               
+                //Normals//
+                geometry.computeVertexNormals(true);
+                geometry.computeFaceNormals();
+               
+                         
+                
+                //Material//
+                var material = [new THREE.MeshBasicMaterial({color:"red", wireframe:true}), new THREE.MeshBasicMaterial()];
+                material[1].color.setHSL(rColor,rColor,rColor);
+                
+                
+                //Mesh//
+                var plane1 = new THREE.SceneUtils.createMultiMaterialObject(geometry, material);
+                plane1.translateX(-width/2);
+                plane1.translateZ(-depth/2);
+                plane1.name = 'terrain1';
+                
+                 //Mesh//
+                    
+                var plane2 = new THREE.SceneUtils.createMultiMaterialObject(geometry, material);
+                plane2.translateX(-widthHalf);
+                plane2.translateZ(-depth*1.5);
+                plane2.translateY;
+                //plane2.geometry.position.y = 2
+                plane2.name = 'terrain2';
+                
+                
+                scene.add(plane1);
+                scene.add(plane2);
+                console.log(plane1);
+                console.log(plane2);
+                
+            }
+                  //PerlinTERRAIN//
+                var width = 100, widthHalf = 50;
+                var depth = 100, depthHalf = 50;
+                var spacingX = 1;
+                var spacingZ = 1;
+                var height = 3.8;
+                var plane1, plane2;
+                
+        /*        
+            create3DTerrain(width,depth,spacingX,spacingZ,height)    
+                
+            function create3DTerrain (width,depth,spacingX,spacingZ,height){
+                
+                
+                //seed//
+              // var date = new Date();
+                //noise.seed(Math.random());
+                
+                
+                
+               //Verts// 
+                var geometry = new THREE.Geometry();
+                    for (var z = 0; z<depth; z++){
+                        for (var x = 0; x<width; x++){
+                            var yValue = Math.abs(noise.perlin2(x/11,z/11)*height);
+                            var vertex = new THREE.Vector3(x*spacingX, yValue*height,z*spacingZ);
+                           
+                            geometry.vertices.push(vertex);
+                            geometry.verticesNeedUpdate = true;
+                        }
+                    }
+                
+                
+                //Faces//
+                for (var z = 0; z<depth -1; z++){
+                    for(var x = 0; x<width -1; x++){
+                        
+                        var a = x + z * width;
+                        var b = (x+1) + (z *width);
+                        var c = x + ((z+1)*width);
+                        var d = (x+1)+((z+1)*width);
+                        
+                        var face1 = new THREE.Face3(b,a,c);
+                        var face2 = new THREE.Face3(c,d,b);
+                        geometry.faces.push(face1);
+                        geometry.faces.push(face2);
+                    }
+                }
+               
+                //Normals//
+                geometry.computeVertexNormals(true);
+                geometry.computeFaceNormals();
+               
+                         
+                
+                //Material//
+                var material = [new THREE.MeshBasicMaterial({color:"red", wireframe:true}), new THREE.MeshBasicMaterial()];
+                material[1].color.setHSL(Math.random(),Math.random(),rColor);
+                
+                
+                //Mesh//
+                var plane1 = new THREE.SceneUtils.createMultiMaterialObject(geometry, material);
+                plane1.translateX(-width/2);
+                plane1.translateZ(-depth/2);
+                plane1.name = 'terrain1';
+                
+                 //Mesh//
+                    
+                var plane2 = new THREE.SceneUtils.createMultiMaterialObject(geometry, material);
+                plane2.translateX(-widthHalf);
+                plane2.translateZ(-depth*1.5);
+                plane2.name = 'terrain2';
+                
+                
+                scene.add(plane1);
+                scene.add(plane2);
+                console.log(plane1);
+                console.log(plane2);
+                
+            }
+                
+                
+            
+            /*    for(var i = 0; i<geometry.vertices.length; i++){
+                if(geometry.vertices[i].z === depthHalf|| geometry.vertices[i].z=== -depthHalf){
+                        console.log(geometry.vertices[i]);
+                    geometry.vertices[i].y = 0;
+                    geometry.vertices.push(geometry.vertices[i]);
+                    }
+                }*/
+         
+            
+          /*     //RandomPlane
+                 var planeVert = scene.children[2].children[1].geometry.vertices;
+              //  var h = Math.floor(Math.random()*(200-100)+100);
+               // console.log(h);
+                for(var i =0;i<planeVert.length;i++ ){
+                   // plane1[i].z = Math.random();
+                    if(planeVert[i].z === depthHalf|| planeVert[i].z=== -depthHalf){
+                        planeVert[i].y =0;
+                    }
+                }
+            */
+         
+                
+                
+        /*        //LIGHTS//
+                var light	= new THREE.AmbientLight( 0x202020 )
+		scene.add( light )
+		// add a light in front
+		var light	= new THREE.DirectionalLight('white', 5)
+		light.position.set(0.5, 0.0, 2)
+		scene.add( light )
+		// add a light behind
+		var light	= new THREE.DirectionalLight('white', 0.75*2)
+		light.position.set(-0.5, -0.5, -2)
+		scene.add( light )		
+                
+                
+              */  
